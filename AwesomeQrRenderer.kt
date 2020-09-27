@@ -1,5 +1,7 @@
-package com.github.sumimakito.awesomeqr
+package com.github.sumimakito.awesomeqrcode
 
+import android.graphics.Bitmap
+import android.graphics.Color
 import com.google.zxing.EncodeHintType
 import com.google.zxing.WriterException
 import com.google.zxing.common.BitMatrix
@@ -48,4 +50,27 @@ class AwesomeQrRenderer {
         }
         return output
     }
+
+
+    fun genQRcodeBitmap(content: String, errorCorrectionLevel: ErrorCorrectionLevel, width: Int, height: Int): Bitmap? {
+        val byteMatrix: ByteMatrix
+        byteMatrix = try {
+            val qrcode = getProtoQrCode(content, errorCorrectionLevel)
+            qrcode.matrix
+        } catch (e: WriterException) {
+            e.printStackTrace()
+            return null
+        }
+        val bitMatrix = convertByteMatrixToBitMatrix(byteMatrix)
+        val bitMatrixHeight = bitMatrix.height
+        val bitMatrixWidth = bitMatrix.width
+        val bmp = Bitmap.createBitmap(bitMatrixWidth, bitMatrixHeight, Bitmap.Config.ARGB_8888)
+        for (x in 0 until bitMatrixWidth) {
+            for (y in 0 until bitMatrixHeight) {
+                bmp.setPixel(x, y, if (bitMatrix[x, y]) Color.BLACK else Color.WHITE)
+            }
+        }
+        return Bitmap.createScaledBitmap(bmp, width, height, false)
+    }
+
 }
